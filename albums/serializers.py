@@ -43,6 +43,37 @@ class AlbumPageSerializer(serializers.ModelSerializer):
 
 class PhotoAlbumSerializer(serializers.ModelSerializer):
     pages = AlbumPageSerializer(many=True, read_only=True)
+    stats = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = PhotoAlbum
         fields = '__all__'
+        read_only_fields = ['user']
+
+    def get_stats(self, obj):
+        # Используем аннотированное поле `pages_count`, если оно есть (иначе fallback на стандартный count)
+        pages_count = getattr(obj, 'pages_count', obj.pages.count())
+        return f"В альбоме {pages_count} страниц(ы)"
+
+    def validate_title(self, value):
+        # ВАЛИДАЦИЯ НА УРОВНЕ ПОЛЯ
+        forbidden_words = ['тест', 'спам', 'мат']
+        if any(word in value.lower() for word in forbidden_words):
+            raise serializers.ValidationError("Название содержит недопустимые слова.")
+        return value
+
+    def validate(self, attrs):
+        # ВАЛИДАЦИЯ НА УРОВНЕ ОБЪЕКТА
+        status = attrs.get('status', self.instance.status if self.instance else 'Draft')
+        cover_type = attrs.get('cover_type', self.instance.cover_type if self.instance else None)
+        
+        if status == 'Completed' and not cover_type:
+            raise serializers.ValidationError({"cover_type": "У завершенного альбома должен быть выбран тип обложки."})
+        return attrs
+
+    def create(self, validated_data):
+        # Передача данных через context: автоматическая привязка автора
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)

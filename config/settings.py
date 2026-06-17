@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sentry_sdk
 
 # Базовая директория проекта (курсовой 3-4 семак)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -73,3 +74,23 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- НАСТРОЙКИ CELERY (Redis как брокер) ---
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+# --- НАСТРОЙКИ ПОЧТЫ (Отправка через Mailhog) ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = 1025
+
+# --- НАСТРОЙКИ SENTRY (Мониторинг ошибок) ---
+# Для реального проекта здесь будет DSN от вашего Sentry-аккаунта
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )

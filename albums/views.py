@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
+from django.db.models import Count
+from django.db import transaction
 from django.utils import timezone
 
 # Наши сериализаторы
@@ -65,7 +67,9 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filterset_fields = {'created_at': ['gte', 'lte', 'exact']}
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        # Оптимизация: загружаем связанного пользователя единым SQL JOIN'ом
+        qs = super().get_queryset().select_related('user')
+        
         if self.request.user.is_authenticated and not self.request.user.is_superuser:
             qs = qs.filter(user=self.request.user)
         return qs
@@ -96,11 +100,26 @@ class PhotoAlbumViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
 
     def get_queryset(self):
-        qs = PhotoAlbum.objects.all()
+        # Оптимизация запросов N+1: JOIN для FK, отдельные запросы для Many-to-Many
+        qs = PhotoAlbum.objects.all().select_related(
+            'user', 'cover_type'
+        ).prefetch_related(
+            'pages', 'pages__placements'
+        ).annotate(
+            pages_count=Count('pages', distinct=True) # Аннотация для SerializerMethodField
+        )
+        
         # Фильтрация альбомов строго по текущему пользователю
         if self.request.user.is_authenticated and not self.request.user.is_superuser:
             qs = qs.filter(user=self.request.user)
         return qs
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Если статус изменился на "В печати", отправляем асинхронную задачу
+        if instance.status == 'Printing':
+            from .tasks import send_printing_email
+            send_printing_email.delay(instance.user.email, instance.title)
 
     # ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ: Получение черновиков
     @action(methods=['GET'], detail=False)
@@ -126,6 +145,7 @@ class PhotoAlbumViewSet(viewsets.ModelViewSet):
 
     # ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ: Клонирование альбома
     @action(methods=['POST'], detail=True)
+    @transaction.atomic # Гарантируем атомарность транзакции БД
     def clone(self, request, pk=None):
         album = self.get_object()
         

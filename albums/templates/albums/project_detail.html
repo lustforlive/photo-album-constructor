@@ -1,0 +1,19 @@
+{% extends 'albums/base.html' %}
+
+{% block content %}
+<h1>Проект: {{ project.title }}</h1>
+
+<div style="background-color: #fafafa; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+    <p><strong>Владелец:</strong> {{ project.user.email }}</p>
+    <p><strong>Формат:</strong> {{ project.format.name }}</p>
+    <p><strong>Статус:</strong> {{ project.get_status_display }}</p>
+    <p><strong>Создан:</strong> {{ project.created_at|date:"d.m.Y H:i" }}</p>
+    <p><strong>Обновлен:</strong> {{ project.updated_at|date:"d.m.Y H:i" }}</p>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{% url 'project_list' %}"><button style="background-color: #e0e0e0; color: #333;">Назад к списку</button></a>
+    <a href="{% url 'project_update' project.pk %}"><button style="background-color: #2196F3; color: white;">Редактировать</button></a>
+    <a href="{% url 'project_delete' project.pk %}"><button style="background-color: #f44336; color: white;">Удалить</button></a>
+</div>
+{% endblock %}

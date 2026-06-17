@@ -1,0 +1,16 @@
+{% extends 'albums/base.html' %}
+
+{% block content %}
+<h1>Удаление проекта</h1>
+
+<div style="background-color: #ffe6e6; padding: 20px; border: 1px solid #ffcccc; border-radius: 5px; max-width: 600px;">
+    <p>Вы уверены, что хотите удалить проект <strong>"{{ project.title }}"</strong> (Владелец: {{ project.user.email }})?</p>
+    <p>Это действие нельзя будет отменить.</p>
+
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: #f44336; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">Да, удалить навсегда</button>
+        <a href="{{ project.get_absolute_url }}" style="margin-left: 15px;">Отмена (вернуться к проекту)</a>
+    </form>
+</div>
+{% endblock %}

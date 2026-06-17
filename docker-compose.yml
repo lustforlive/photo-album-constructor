@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    container_name: albums_constructor_web
+    # При старте накатываем миграции и запускаем development-сервер
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      # Монтируем корень проекта в папку /app внутри контейнера.
+      # Это обеспечит live-reload кода и сохранность db.sqlite3 / папки media
+      - .:/app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

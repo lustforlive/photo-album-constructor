@@ -1,0 +1,16 @@
+{% extends 'albums/base.html' %}
+
+{% block content %}
+<h1>{% if object %}Редактирование проекта{% else %}Создание нового проекта{% endif %}</h1>
+
+<div style="background-color: #fafafa; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div style="margin-top: 15px;">
+            <button type="submit" style="background-color: #4CAF50; color: white;">Сохранить</button>
+            <a href="javascript:history.back()" style="margin-left: 15px; color: #555;">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

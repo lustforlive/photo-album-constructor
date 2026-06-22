@@ -1,13 +1,64 @@
+version: '3.8'
+
 services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: photo_album
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   web:
     build: .
-    container_name: albums_constructor_web
-    # При старте накатываем миграции и запускаем development-сервер
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      # Монтируем корень проекта в папку /app внутри контейнера.
-      # Это обеспечит live-reload кода и сохранность db.sqlite3 / папки media
-      - .:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py createsuperuser --noinput --username admin --email admin@example.com || true &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     ports:
       - "8000:8000"
-    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      DEBUG: 'False'
+      ALLOWED_HOSTS: '*'
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/photo_album
+      REDIS_URL: redis://redis:6379/0
+      EMAIL_BACKEND: smtp://mailhog:1025
+
+  celery:
+    build: .
+    command: celery -A config worker -l info
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/photo_album
+      REDIS_URL: redis://redis:6379/0
+
+  flower:
+    image: mher/flower:latest
+    command: celery --broker=redis://redis:6379/0 flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery
+
+volumes:
+  postgres_data:

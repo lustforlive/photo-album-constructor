@@ -1,18 +1,19 @@
-# Используем легковесный образ Python 3.10
-FROM python:3.10-slim
+FROM python:3.14-slim
 
-# Устанавливаем рабочую директорию в контейнере
 WORKDIR /app
 
-# Запрещаем Python писать файлы .pyc и отключаем буферизацию вывода
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Копируем зависимости и устанавливаем их
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
-# Копируем исходный код проекта
-COPY . /app/
+# Копируйте весь проект ПЕРЕД этой строкой
+COPY . .
+
+RUN python manage.py collectstatic --noinput || true
 
 EXPOSE 8000
+
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

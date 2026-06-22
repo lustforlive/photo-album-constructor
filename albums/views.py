@@ -24,7 +24,7 @@ from .serializers import (
 # ==========================================
 
 class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 20
+    page_size = 10
     page_size_query_param = 'page_size'
     page_size_max = 100
     page_query_param = 'page'
@@ -79,24 +79,23 @@ class PhotoViewSet(viewsets.ModelViewSet):
             user=self.request.user
         ).select_related('user').prefetch_related('placements').annotate(
             placements_count=Count('placements', distinct=True)
-        )
+        ).order_by('-created_at')
 
     def perform_create(self, serializer):
         """Автоматическая привязка пользователя"""
         serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'])
-    def my_photos(self, request):
+    def unassigned_or_nameless_current_year(self, request):
         """
-        Получить все мои фотографии
-        СЛОЖНЫЙ ЗАПРОС 1: Q-объект для фильтрации по статусу и дате
+        Получить нераспределенные или безымянные фотографии текущего года
+        СЛОЖНЫЙ ЗАПРОС 1: Q-объект с ИЛИ (|) и И (&)
         """
-        # Q-объект: показать фото за последний месяц ИЛИ все неиспользованные
-        one_month_ago = timezone.now() - timedelta(days=30)
+        current_year = timezone.now().year
         qs = self.get_queryset().filter(
-            Q(created_at__gte=one_month_ago) |  # За последний месяц
-            Q(placements__isnull=True)  # Или не использованные
-        ).distinct()
+            Q(created_at__year=current_year) &
+            (Q(placements__isnull=True) | Q(title='') | Q(title__isnull=True))
+        ).distinct().order_by('-created_at')
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -241,19 +240,16 @@ class PhotoAlbumViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
-    def recent_updates(self, request):
+    def completed_wedding_non_leather(self, request):
         """
-        Альбомы, обновленные за последние 7 дней
-        СЛОЖНЫЙ ЗАПРОС 2: Q-объект с отрицанием и логическими операторами
+        Поиск завершенных свадебных альбомов НЕ из кожи
+        СЛОЖНЫЙ ЗАПРОС 2: Q-объект с И (&) и НЕ (~)
         """
-        seven_days_ago = timezone.now() - timedelta(days=7)
-        
-        # Показать альбомы, которые обновлены за 7 дней
-        # И НЕ находятся в статусе 'delivered'
         qs = self.get_queryset().filter(
-            Q(updated_at__gte=seven_days_ago) &
-            ~Q(status='delivered')
-        ).order_by('-updated_at')
+            Q(status='completed') &
+            (Q(title__icontains='свадебный') | Q(description__icontains='свадебный')) &
+            ~Q(cover_type__name__icontains='кожа')
+        ).order_by('-created_at')
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -333,9 +329,10 @@ class AlbumPageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         album_id = self.kwargs.get('album_id')
-        return AlbumPage.objects.filter(
-            album_id=album_id
-        ).select_related('album').prefetch_related('placements__photo')
+        queryset = AlbumPage.objects.filter(album_id=album_id)
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(album__user=self.request.user)
+        return queryset.select_related('album').prefetch_related('placements__photo')
 
 
 class PhotoPlacementViewSet(viewsets.ModelViewSet):
@@ -346,6 +343,7 @@ class PhotoPlacementViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         page_id = self.kwargs.get('page_id')
-        return PhotoPlacement.objects.filter(
-            page_id=page_id
-        ).select_related('photo', 'page')
+        queryset = PhotoPlacement.objects.filter(page_id=page_id)
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(page__album__user=self.request.user)
+        return queryset.select_related('photo', 'page')

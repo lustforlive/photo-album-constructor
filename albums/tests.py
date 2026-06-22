@@ -205,3 +205,101 @@ class PhotoAPITest(APITestCase):
         response = self.client.get('/api/photos/unused_photos/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
+
+
+class CourseworkCriteriaTest(APITestCase):
+    """Специфичные тесты для проверки требований ИКТ"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(username='user1', password='password123')
+        self.user2 = User.objects.create_user(username='user2', password='password123')
+        self.cover_leather = CoverType.objects.create(name='Кожаная люкс', price=2000)
+        self.cover_paper = CoverType.objects.create(name='Бумажная стандарт', price=500)
+
+    def test_completed_wedding_non_leather_filter(self):
+        """Проверка Q-запроса 1: завершенные свадебные альбомы НЕ из кожи"""
+        self.client.force_authenticate(user=self.user1)
+        
+        # 1. Завершенный, свадебный, НЕ из кожи (должен быть найден)
+        album1 = PhotoAlbum.objects.create(
+            title='Наш свадебный день',
+            description='Свадебный альбом',
+            user=self.user1,
+            cover_type=self.cover_paper,
+            status='completed'
+        )
+        
+        # 2. Завершенный, свадебный, из кожи (НЕ должен быть найден)
+        PhotoAlbum.objects.create(
+            title='Свадебный премиум',
+            description='Свадебный',
+            user=self.user1,
+            cover_type=self.cover_leather,
+            status='completed'
+        )
+
+        # 3. Черновик, свадебный, НЕ из кожи (НЕ должен быть найден)
+        PhotoAlbum.objects.create(
+            title='Свадебный черновик',
+            description='Свадебный',
+            user=self.user1,
+            cover_type=self.cover_paper,
+            status='draft'
+        )
+
+        response = self.client.get('/api/photo-albums/completed_wedding_non_leather/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['id'], album1.id)
+
+    def test_unassigned_or_nameless_current_year_filter(self):
+        """Проверка Q-запроса 2: нераспределенные или безымянные фото текущего года"""
+        self.client.force_authenticate(user=self.user1)
+
+        # 1. Текущий год, без названия, нераспределенная (должна быть найдена)
+        photo1 = Photo.objects.create(
+            title='',
+            user=self.user1
+        )
+        
+        # 2. Текущий год, с названием, распределенная (НЕ должна быть найдена)
+        photo2 = Photo.objects.create(
+            title='Красивый пейзаж',
+            user=self.user1
+        )
+        album = PhotoAlbum.objects.create(title='Альбом', user=self.user1)
+        page = AlbumPage.objects.create(album=album, page_number=1)
+        PhotoPlacement.objects.create(photo=photo2, page=page, width=100, height=100)
+
+        response = self.client.get('/api/photos/unassigned_or_nameless_current_year/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['id'], photo1.id)
+
+    def test_idor_page_protection(self):
+        """Проверка защиты от IDOR для страниц: пользователь не видит чужие страницы"""
+        album_user1 = PhotoAlbum.objects.create(title='Альбом Юзера 1', user=self.user1)
+        page_user1 = AlbumPage.objects.create(album=album_user1, page_number=1)
+
+        # Под юзером 2 пытаемся запросить страницы альбома юзера 1
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.get(f'/api/photo-albums/{album_user1.id}/pages/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 0)
+
+    def test_placement_user_validation(self):
+        """Проверка валидации: нельзя разместить фото другого юзера"""
+        album_user1 = PhotoAlbum.objects.create(title='Альбом Юзера 1', user=self.user1)
+        page_user1 = AlbumPage.objects.create(album=album_user1, page_number=1)
+        photo_user2 = Photo.objects.create(title='Фото Юзера 2', user=self.user2)
+
+        self.client.force_authenticate(user=self.user1)
+        data = {
+            'photo': photo_user2.id,
+            'page': page_user1.id,
+            'width': 100,
+            'height': 100
+        }
+        response = self.client.post(f'/api/pages/{page_user1.id}/placements/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -40,6 +40,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/photo_album
       REDIS_URL: redis://redis:6379/0
       EMAIL_BACKEND: smtp://mailhog:1025
+    volumes:
+      - media_data:/app/media
 
   celery:
     build: .
@@ -50,6 +52,20 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/photo_album
       REDIS_URL: redis://redis:6379/0
+    volumes:
+      - media_data:/app/media
+
+  celery-beat:
+    build: .
+    command: celery -A config beat -l info
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/photo_album
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - media_data:/app/media
 
   flower:
     image: mher/flower:latest
@@ -62,3 +78,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:

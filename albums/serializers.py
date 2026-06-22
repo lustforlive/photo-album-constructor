@@ -94,6 +94,25 @@ class PhotoPlacementSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Высота должна быть от 10 до 1000 мм")
         return value
 
+    def validate(self, attrs):
+        """Валидация: фотография должна принадлежать автору альбома, и страница должна принадлежать пользователю"""
+        photo = attrs.get('photo')
+        page = attrs.get('page')
+        
+        if not photo and self.instance:
+            photo = self.instance.photo
+        if not page and self.instance:
+            page = self.instance.page
+            
+        if page:
+            if page.album.user != self.context['request'].user:
+                raise serializers.ValidationError("Вы можете размещать фотографии только на страницах своих альбомов.")
+                
+        if photo and page:
+            if photo.user != page.album.user:
+                raise serializers.ValidationError("Выбранная фотография должна принадлежать автору альбома.")
+        return attrs
+
 
 class AlbumPageSerializer(serializers.ModelSerializer):
     """Страница альбома"""
@@ -104,6 +123,20 @@ class AlbumPageSerializer(serializers.ModelSerializer):
         model = AlbumPage
         fields = ('id', 'album', 'page_number', 'width', 'height', 'placements', 'placements_count', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def validate_album(self, value):
+        """Проверка, что альбом принадлежит пользователю"""
+        if value.user != self.context['request'].user:
+            raise serializers.ValidationError("Вы можете создавать страницы только для своих альбомов.")
+        return value
+
+    def validate(self, attrs):
+        """Валидация: максимум 8 фото на одной странице"""
+        incoming = self.initial_data.get('placements', []) if self.initial_data else []
+        current = self.instance.placements.count() if self.instance else 0
+        if (current + len(incoming)) > 8:
+            raise serializers.ValidationError("Превышен лимит: максимум 8 фото на одной странице.")
+        return attrs
 
     def get_placements_count(self, obj):
         """Количество размещений на странице"""

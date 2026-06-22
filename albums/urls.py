@@ -8,5 +8,25 @@ router.register(r'photo-albums', views.PhotoAlbumViewSet, basename='photoalbum')
 router.register(r'cover-types', views.CoverTypeViewSet, basename='covertype')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
+    path('photo-albums/<int:album_id>/pages/', views.AlbumPageViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='album-pages-list'),
+    path('photo-albums/<int:album_id>/pages/<int:pk>/', views.AlbumPageViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='album-pages-detail'),
+    path('pages/<int:page_id>/placements/', views.PhotoPlacementViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='page-placements-list'),
+    path('pages/<int:page_id>/placements/<int:pk>/', views.PhotoPlacementViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='page-placements-detail'),
 ]

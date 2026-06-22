@@ -1,8 +1,5 @@
-# Makefile для управления проектом "Конструктор фотоальбомов"
-
 .PHONY: up down restart build ps logs logs-web logs-celery migrate makemigrations seed superuser shell test clean help
 
-# По умолчанию выводит справку по всем командам
 help:
 	@echo "Доступные команды для управления проектом:"
 	@echo "  make up              - Запустить все контейнеры в фоновом режиме"

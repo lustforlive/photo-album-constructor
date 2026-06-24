@@ -1,0 +1,566 @@
+{
+	"info": {
+		"_postman_id": "d7bcf82c-4b51-4f36-a1d2-06b5e024cb51",
+		"name": "Photo Album Constructor API",
+		"description": "Коллекция запросов Postman для тестирования API проекта 'Конструктор фотоальбомов'.\n\nДля авторизации запросов убедитесь, что вы авторизовались через сессию (Session Authentication в Django) или скопировали сессионные куки в Postman. Также можно использовать Token-авторизацию, добавив заголовок `Authorization: Token <токен>`.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Cover Types",
+			"item": [
+				{
+					"name": "List Cover Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cover-types/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cover-types",
+								""
+							]
+						},
+						"description": "Получить список доступных типов обложек."
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Cover Type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cover-types/{{cover_type_id}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cover-types",
+								"{{cover_type_id}}",
+								""
+							]
+						},
+						"description": "Получить информацию о конкретном типе обложки по её ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Photos",
+			"item": [
+				{
+					"name": "List Photos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photos/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photos",
+								""
+							]
+						},
+						"description": "Получить список фотографий текущего пользователя."
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Photo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Моя фотография",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/photos/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photos",
+								""
+							]
+						},
+						"description": "Загрузить новую фотографию (тип body: form-data)."
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Photo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photos/{{photo_id}}/duplicate/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photos",
+								"{{photo_id}}",
+								"duplicate",
+								""
+							]
+						},
+						"description": "Создать дубликат существующей фотографии."
+					},
+					"response": []
+				},
+				{
+					"name": "Unassigned or Nameless Current Year",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photos/unassigned_or_nameless_current_year/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photos",
+								"unassigned_or_nameless_current_year",
+								""
+							]
+						},
+						"description": "Получить список нераспределенных или безымянных фотографий за текущий год (сложный запрос Q)."
+					},
+					"response": []
+				},
+				{
+					"name": "Unused Photos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photos/unused_photos/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photos",
+								"unused_photos",
+								""
+							]
+						},
+						"description": "Получить список неиспользуемых (не размещенных ни в одном альбоме) фотографий."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Photo Albums",
+			"item": [
+				{
+					"name": "List Albums",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								""
+							]
+						},
+						"description": "Получить список альбомов текущего пользователя (с фильтрацией и пагинацией)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Album",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Летний альбом 2026\",\n    \"description\": \"Мой отпуск на море\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								""
+							]
+						},
+						"description": "Создать новый пустой фотоальбом в статусе 'Черновик'."
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Album Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								""
+							]
+						},
+						"description": "Получить детальную информацию об альбоме со всеми его страницами и размещениями."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Album Status / Cover",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cover_type\": 1,\n    \"status\": \"in_progress\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								""
+							]
+						},
+						"description": "Обновить обложку и статус альбома."
+					},
+					"response": []
+				},
+				{
+					"name": "Clone Album",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/clone/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								"clone",
+								""
+							]
+						},
+						"description": "Клонировать существующий альбом со всеми его страницами и размещениями (транзакционная операция)."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Album to Print",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/send_to_print/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								"send_to_print",
+								""
+							]
+						},
+						"description": "Отправить альбом в печать (запускает асинхронную задачу Celery для отправки email)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Album Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/statistics/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								"statistics",
+								""
+							]
+						},
+						"description": "Получить сводную статистику по страницам и фотографиям альбома."
+					},
+					"response": []
+				},
+				{
+					"name": "List Drafts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/drafts/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"drafts",
+								""
+							]
+						},
+						"description": "Получить список всех черновиков пользователя."
+					},
+					"response": []
+				},
+				{
+					"name": "Completed Wedding Non-Leather",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/completed_wedding_non_leather/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"completed_wedding_non_leather",
+								""
+							]
+						},
+						"description": "Поиск завершенных свадебных альбомов не из кожи (сложный запрос Q)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Album Pages",
+			"item": [
+				{
+					"name": "List Album Pages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/pages/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								"pages",
+								""
+							]
+						},
+						"description": "Получить список страниц для конкретного альбома."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Album Page",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"album\": {{album_id}},\n    \"page_number\": 1,\n    \"width\": 210,\n    \"height\": 297\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/photo-albums/{{album_id}}/pages/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"photo-albums",
+								"{{album_id}}",
+								"pages",
+								""
+							]
+						},
+						"description": "Добавить новую страницу в альбом."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Photo Placements",
+			"item": [
+				{
+					"name": "List Placements on Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pages/{{page_id}}/placements/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pages",
+								"{{page_id}}",
+								"placements",
+								""
+							]
+						},
+						"description": "Получить список размещений фотографий на конкретной странице."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Photo Placement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"photo\": {{photo_id}},\n    \"page\": {{page_id}},\n    \"x\": 20.0,\n    \"y\": 35.0,\n    \"width\": 100.0,\n    \"height\": 150.0,\n    \"rotation\": 0.0,\n    \"z_index\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pages/{{page_id}}/placements/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pages",
+								"{{page_id}}",
+								"placements",
+								""
+							]
+						},
+						"description": "Разместить фотографию на холсте страницы."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					  "const csrfCookie = pm.cookies.toObject()['csrftoken'];",
+					  "if (csrfCookie) {",
+					  "    pm.request.headers.add({",
+					  "        key: 'X-CSRFToken',",
+					  "        value: csrfCookie",
+					  "    });",
+					  "}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "cover_type_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "photo_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "album_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "page_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

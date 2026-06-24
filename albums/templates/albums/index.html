@@ -3,59 +3,874 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Album Constructor</title>
+    <title>Photo Album Constructor Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root {
+            --bg-color: #08060f;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #8a2be2;
+            --primary-glow: rgba(138, 43, 226, 0.4);
+            --accent: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.3);
+            --text-main: #f3f1f6;
+            --text-muted: #a39eb9;
+            --success: #00e676;
+            --warning: #ffb300;
+            --error: #ff1744;
+            --font-display: 'Outfit', 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
         }
-        .container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.08) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        p {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .links {
+
+        /* Glassmorphism Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 6, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
             display: flex;
-            gap: 20px;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
         }
-        a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #667eea;
-            color: white;
+
+        .logo {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 70%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-btn {
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
         }
-        a:hover {
-            background-color: #764ba2;
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--card-border);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: radial-gradient(100% 200% at 0% 0%, rgba(138, 43, 226, 0.15) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            max-width: 600px;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #b359ff);
+            color: #fff;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Glassmorphic Cards */
+        .glass-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            margin-bottom: 2rem;
+        }
+
+        /* Album List Styles */
+        .album-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        @media (max-width: 600px) {
+            .album-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .album-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+        }
+
+        .album-card:hover {
+            border-color: rgba(138, 43, 226, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .album-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .album-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .badge-draft { background: rgba(163, 158, 185, 0.15); color: var(--text-muted); }
+        .badge-in_progress { background: rgba(255, 179, 0, 0.15); color: var(--warning); }
+        .badge-completed { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+        .badge-printing { background: rgba(0, 242, 254, 0.15); color: var(--accent); }
+        .badge-delivered { background: rgba(138, 43, 226, 0.2); color: #c48eff; }
+
+        .album-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .album-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.8rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .album-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 0.35rem 0.7rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Photos Section Styles */
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .photo-thumb {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            position: relative;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.01);
+            transition: all 0.2s ease;
+        }
+
+        .photo-thumb:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Sleek Form Styles */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Drag-and-drop Photo uploader */
+        .upload-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.01);
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 242, 254, 0.02);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .toast {
+            background: rgba(15, 12, 28, 0.85);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--primary);
+            border-top: 1px solid var(--card-border);
+            border-right: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success { border-left-color: var(--success); }
+        .toast-warning { border-left-color: var(--warning); }
+        .toast-error { border-left-color: var(--error); }
+
+        /* Login notice */
+        .auth-notice {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .auth-notice h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-notice p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Loaders */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📸 Photo Album Constructor</h1>
-        <p>Создавайте красивые фотоальбомы онлайн</p>
-        <div class="links">
-            <a href="/admin/">🔐 Admin Panel</a>
-            <a href="/api/">🔌 API</a>
+
+    <header>
+        <div class="logo">
+            <span>📸</span> Photo Album Constructor
         </div>
+        <div class="nav-links">
+            <a href="/api/" class="nav-btn">🔌 REST API Browser</a>
+            <a href="/admin/" class="nav-btn">🔐 Панель Admin</a>
+            
+            {% if user.is_authenticated %}
+            <div class="user-profile">
+                <div class="user-avatar"></div>
+                <div class="user-name">{{ user.username }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="container">
+        
+        {% if not user.is_authenticated %}
+        <div class="glass-panel auth-notice">
+            <h2>🔐 Доступ ограничен</h2>
+            <p>Вы не вошли в систему. Для просмотра дашборда и взаимодействия с API, пожалуйста, авторизуйтесь.</p>
+            <a href="/admin/login/?next=/" class="btn btn-primary">Войти через Панель Администратора</a>
+        </div>
+        {% else %}
+        
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Создавайте потрясающие фотоальбомы</h1>
+            <p>Добро пожаловать в панель управления! Загружайте свои фотографии, комбинируйте их в страницы альбомов и отправляйте готовые полиграфические макеты на печать.</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" onclick="document.getElementById('album-title-input').focus();">
+                    <span>✨</span> Создать новый альбом
+                </button>
+                <a href="#photos-section" class="btn btn-secondary">
+                    <span>📷</span> Моя галерея
+                </a>
+            </div>
+        </div>
+
+        <!-- Dashboard Workspace Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Left Column: Albums -->
+            <div>
+                <div class="section-title">
+                    <h2>Мои фотоальбомы</h2>
+                </div>
+                
+                <div class="glass-panel">
+                    <div id="albums-loader" class="spinner"></div>
+                    <div id="albums-container" class="album-list"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar (Upload Photo & Create Album) -->
+            <div>
+                <div class="section-title">
+                    <h2>Управление</h2>
+                </div>
+
+                <!-- Create Album Card -->
+                <div class="glass-panel">
+                    <h3 style="margin-bottom: 1.2rem; font-family: var(--font-display);">Создать альбом</h3>
+                    <form id="create-album-form">
+                        <div class="form-group">
+                            <label class="form-label" for="album-title-input">Название альбома</label>
+                            <input type="text" id="album-title-input" class="form-input" placeholder="Например: Свадьба 2026" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="album-desc-input">Описание</label>
+                            <textarea id="album-desc-input" class="form-input" placeholder="Памятные моменты..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Создать пустой макет</button>
+                    </form>
+                </div>
+
+                <!-- Upload Photos Card -->
+                <div class="glass-panel" id="photos-section">
+                    <h3 style="margin-bottom: 1.2rem; font-family: var(--font-display);">Загрузить фотографию</h3>
+                    <div class="upload-zone" id="drop-zone">
+                        <div class="upload-icon">📤</div>
+                        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem;">Перетащите файл сюда</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem;">Или нажмите для выбора (до 10MB)</div>
+                        <input type="file" id="file-uploader" accept="image/*">
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <h4 style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Недавние снимки</h4>
+                        <div id="photos-loader" class="spinner"></div>
+                        <div id="photos-container" class="photo-gallery"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        
+        {% endif %}
+
     </div>
+
+    <!-- Toast Notifications Root -->
+    <div class="toast-container" id="toast-root"></div>
+
+    <script>
+        // CSRF Token for POST requests
+        const csrfToken = "{{ csrf_token }}";
+
+        // Global Toast Notification Helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-root');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <span style="cursor:pointer; font-weight:bold; margin-left:1rem;" onclick="this.parentElement.remove()">×</span>
+            `;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto destroy after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        {% if user.is_authenticated %}
+        
+        // Fetch and Render Albums
+        async function loadAlbums() {
+            const loader = document.getElementById('albums-loader');
+            const container = document.getElementById('albums-container');
+            if (loader) loader.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/photo-albums/');
+                if (!response.ok) throw new Error('Ошибка сети при загрузке альбомов');
+                
+                const data = await response.json();
+                const albums = data.results || data; // Handle DRF pagination response
+                
+                container.innerHTML = '';
+                if (albums.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:2rem 0;">У вас пока нет созданных альбомов. Начните с создания макета справа!</div>';
+                } else {
+                    albums.forEach(album => {
+                        const card = document.createElement('div');
+                        card.className = 'album-card';
+                        
+                        // Human readable dates
+                        const createdDate = new Date(album.created_at).toLocaleDateString('ru-RU');
+                        
+                        card.innerHTML = `
+                            <div>
+                                <div class="album-header">
+                                    <span class="album-title">${escapeHtml(album.title)}</span>
+                                    <span class="badge badge-${album.status}">${escapeHtml(album.status_display || album.status)}</span>
+                                </div>
+                                <div class="album-desc">${escapeHtml(album.description || 'Без описания')}</div>
+                            </div>
+                            <div>
+                                <div class="album-footer">
+                                    <span>📅 ${createdDate}</span>
+                                    <div class="album-actions">
+                                        <button class="action-btn" onclick="cloneAlbum(${album.id})">Клон 👥</button>
+                                        ${album.status !== 'printing' && album.status !== 'delivered' ? 
+                                            `<button class="action-btn" onclick="sendToPrint(${album.id})">Печать 🖨️</button>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // Fetch and Render Recent Photos
+        async function loadPhotos() {
+            const loader = document.getElementById('photos-loader');
+            const container = document.getElementById('photos-container');
+            if (loader) loader.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/photos/');
+                if (!response.ok) throw new Error('Ошибка сети при загрузке фотографий');
+                
+                const data = await response.json();
+                const photos = data.results || data;
+                
+                container.innerHTML = '';
+                if (photos.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; text-align:center; width:100%; padding:1rem 0;">Галерея пуста</div>';
+                } else {
+                    photos.slice(0, 12).forEach(photo => {
+                        const thumb = document.createElement('div');
+                        thumb.className = 'photo-thumb';
+                        thumb.title = photo.title || 'Изображение';
+                        thumb.innerHTML = `<img src="${photo.file}" alt="${escapeHtml(photo.title)}">`;
+                        container.appendChild(thumb);
+                    });
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // Handle Album Creation Form
+        const createAlbumForm = document.getElementById('create-album-form');
+        if (createAlbumForm) {
+            createAlbumForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const title = document.getElementById('album-title-input').value;
+                const description = document.getElementById('album-desc-input').value;
+                
+                try {
+                    const response = await fetch('/api/photo-albums/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ title, description })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.title || errorData.detail || 'Не удалось создать альбом');
+                    }
+                    
+                    showToast('Альбом успешно создан!');
+                    document.getElementById('album-title-input').value = '';
+                    document.getElementById('album-desc-input').value = '';
+                    loadAlbums();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+        }
+
+        // Handle File Drag and Drop / Selection
+        const dropZone = document.getElementById('drop-zone');
+        const fileUploader = document.getElementById('file-uploader');
+
+        if (dropZone && fileUploader) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    uploadPhotoFile(files[0]);
+                }
+            });
+
+            fileUploader.addEventListener('change', (e) => {
+                if (fileUploader.files.length > 0) {
+                    uploadPhotoFile(fileUploader.files[0]);
+                }
+            });
+        }
+
+        // Upload single photo via API
+        async function uploadPhotoFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('title', file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
+
+            try {
+                showToast('Загрузка файла...', 'warning');
+                const response = await fetch('/api/photos/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errDetails = await response.json();
+                    throw new Error(errDetails.file || errDetails.detail || 'Ошибка при загрузке');
+                }
+
+                showToast('Фотография загружена в галерею!');
+                loadPhotos();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Clone Album Action
+        async function cloneAlbum(id) {
+            try {
+                showToast('Клонирование альбома...', 'warning');
+                const response = await fetch(`/api/photo-albums/${id}/clone/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+
+                if (!response.ok) throw new Error('Не удалось скопировать альбом');
+                
+                showToast('Копия альбома создана!');
+                loadAlbums();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Send to Print Action
+        async function sendToPrint(id) {
+            try {
+                showToast('Отправка на печать...', 'warning');
+                const response = await fetch(`/api/photo-albums/${id}/send_to_print/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Не удалось отправить на печать');
+                }
+
+                showToast('Заказ принят! Запущена отправка email на почту.');
+                loadAlbums();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Helper: escape HTML tags to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Startup Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAlbums();
+            loadPhotos();
+        });
+
+        {% endif %}
+    </script>
 </body>
 </html>
